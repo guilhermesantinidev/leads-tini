@@ -27,6 +27,13 @@
 
 * { box-sizing: border-box; }
 
+/* Garante que o atributo HTML "hidden" sempre vença, mesmo em elementos
+   que têm "display: flex" definido via classe (login-screen, modal-overlay
+   etc). Sem isso, o navegador aplica "hidden" e a classe com a mesma
+   prioridade CSS, e quem vier depois no arquivo vence — o que deixava
+   esses elementos aparecendo mesmo quando o JS tentava escondê-los. */
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   background: var(--bg);
