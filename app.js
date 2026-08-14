@@ -95,6 +95,7 @@ onAuthStateChanged(auth, (user) => {
     loginScreen.hidden = true;
     appEl.hidden = false;
     subscribeLeads();
+    checkSharedHandle();
   } else {
     loginScreen.hidden = false;
     appEl.hidden = true;
@@ -309,7 +310,7 @@ async function moveLead(id, newStatus) {
 // ------------------------------------------------------------
 // Modal — novo / editar
 // ------------------------------------------------------------
-function openModal(lead = null) {
+function openModal(lead = null, prefill = null) {
   leadForm.reset();
   if (lead) {
     modalTitle.textContent = "Editar lead";
@@ -327,8 +328,34 @@ function openModal(lead = null) {
     deleteLeadBtn.hidden = true;
     fieldId.value = "";
     fieldStatus.value = "contatado";
+    if (prefill?.handle) {
+      fieldHandle.value = prefill.handle;
+      // já deixa o cursor pronto pro campo Nome — o @ já veio preenchido,
+      // só falta a pessoa digitar quem é
+      setTimeout(() => fieldNome.focus(), 50);
+    }
   }
   modal.hidden = false;
+}
+
+// ------------------------------------------------------------
+// Compartilhamento do Instagram (Web Share Target — Android)
+// ------------------------------------------------------------
+// Quando a pessoa compartilha um perfil do Instagram direto pro app
+// (aparece "Leads" na lista de apps do menu Compartilhar), o Android abre
+// share-target.html, que extrai o @handle e redireciona pra cá com
+// ?novo_lead_handle=alguem. Aqui a gente pega esse parâmetro, abre o modal
+// já preenchido, e limpa a URL pra não reabrir de novo se a pessoa
+// recarregar a página depois.
+function checkSharedHandle() {
+  const params = new URLSearchParams(window.location.search);
+  const handle = params.get("novo_lead_handle");
+  if (handle) {
+    openModal(null, { handle });
+    // limpa o parâmetro da URL sem recarregar a página
+    const cleanUrl = window.location.pathname;
+    window.history.replaceState({}, document.title, cleanUrl);
+  }
 }
 
 function closeModal() {
