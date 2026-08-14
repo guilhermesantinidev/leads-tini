@@ -2,11 +2,13 @@
 // abrir mais rápido em conexão ruim. Os dados em si (leads) vêm sempre do
 // Firestore ao vivo, não são cacheados aqui.
 
-const CACHE_NAME = "leads-shell-v3"; // versão nova pra forçar atualização do cache
+const CACHE_NAME = "leads-shell-v4"; // versão nova pra forçar atualização do cache
 const SHELL_FILES = [
   "./index.html",
   "./lead-detail.html",
   "./lead-detail.js",
+  "./templates.html",
+  "./templates.js",
   "./style.css",
   "./app.js",
   "./firebase-config.js",

@@ -45,6 +45,8 @@
         <span id="toggle-lost-label">Mostrar perdidos</span>
       </button>
       <button id="import-btn" class="ghost-btn" type="button">Importar</button>
+      <button id="export-btn" class="ghost-btn" type="button">Exportar</button>
+      <a href="templates.html" class="ghost-btn" id="templates-link">Templates</a>
       <input type="search" id="search-input" placeholder="Buscar @ ou nome…" aria-label="Buscar lead">
       <button id="logout-btn" class="ghost-btn" type="button" title="Sair">Sair</button>
     </div>
@@ -93,6 +95,11 @@
       </div>
 
       <label class="field">
+        <span>Telefone (WhatsApp)</span>
+        <input type="tel" id="field-telefone" placeholder="(55) 99999-9999">
+      </label>
+
+      <label class="field">
         <span>Status</span>
         <select id="field-status">
           <option value="contatado">Contatado</option>
@@ -105,6 +112,11 @@
 
       <label class="field">
         <span>Mensagem usada</span>
+        <div class="template-picker-row">
+          <select id="template-select">
+            <option value="">— usar um template salvo —</option>
+          </select>
+        </div>
         <textarea id="field-mensagem" rows="2" placeholder="Ex: template de abertura v2"></textarea>
       </label>
 

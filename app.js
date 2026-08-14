@@ -81,8 +81,10 @@ const fieldHandle = document.getElementById("field-handle");
 const fieldNome = document.getElementById("field-nome");
 const fieldCategoria = document.getElementById("field-categoria");
 const fieldLocalizacao = document.getElementById("field-localizacao");
+const fieldTelefone = document.getElementById("field-telefone");
 const fieldStatus = document.getElementById("field-status");
 const fieldMensagem = document.getElementById("field-mensagem");
+const templateSelect = document.getElementById("template-select");
 const fieldTipoResposta = document.getElementById("field-tipo-resposta");
 const fieldProximaAcao = document.getElementById("field-proxima-acao");
 const fieldNotas = document.getElementById("field-notas");
@@ -107,6 +109,7 @@ onAuthStateChanged(auth, (user) => {
     loginScreen.hidden = true;
     appEl.hidden = false;
     subscribeLeads();
+    subscribeTemplates();
     checkSharedHandle();
   } else {
     loginScreen.hidden = false;
@@ -150,6 +153,28 @@ function subscribeLeads() {
     showToast("Erro ao carregar leads. Confira sua conexão.");
   });
 }
+
+// ------------------------------------------------------------
+// Templates de mensagem — carrega pra popular o seletor rápido no
+// modal de "Novo lead" (não precisa ir na página Templates só pra isso)
+// ------------------------------------------------------------
+let allTemplates = [];
+function subscribeTemplates() {
+  const q = query(collection(db, "templates"), orderBy("createdAt", "desc"));
+  onSnapshot(q, (snap) => {
+    allTemplates = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    templateSelect.innerHTML =
+      `<option value="">— usar um template salvo —</option>` +
+      allTemplates.map((t) => `<option value="${t.id}">${escapeHtml(t.nome)}</option>`).join("");
+  });
+}
+
+templateSelect.addEventListener("change", () => {
+  const chosen = allTemplates.find((t) => t.id === templateSelect.value);
+  if (chosen) {
+    fieldMensagem.value = chosen.texto;
+  }
+});
 
 // ------------------------------------------------------------
 // Renderização
@@ -404,6 +429,7 @@ leadForm.addEventListener("submit", async (e) => {
     nome: fieldNome.value.trim(),
     categoria: fieldCategoria.value.trim(),
     localizacao: fieldLocalizacao.value.trim(),
+    telefone: fieldTelefone.value.trim(),
     status: fieldStatus.value,
     mensagemUsada: fieldMensagem.value.trim(),
     tipoResposta: fieldTipoResposta.value,
@@ -478,6 +504,60 @@ function showToast(message) {
 }
 
 // ------------------------------------------------------------
+// Exportar CSV — backup simples de todos os leads visíveis nos filtros
+// atuais (respeitando busca e "mostrar perdidos")
+// ------------------------------------------------------------
+const exportBtn = document.getElementById("export-btn");
+
+function csvEscape(value) {
+  const str = String(value ?? "");
+  // Envolve em aspas se tiver vírgula, aspas ou quebra de linha — regra
+  // padrão de CSV, evita coluna quebrar ao abrir no Excel/Sheets
+  if (/[",\n]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+exportBtn.addEventListener("click", () => {
+  if (allLeads.length === 0) {
+    showToast("Nada pra exportar ainda.");
+    return;
+  }
+
+  const headers = [
+    "Nome", "Instagram", "Categoria", "Localização", "Telefone",
+    "Status", "Mensagem usada", "Como respondeu", "Data contato",
+    "Próxima ação", "Descrição/Notas"
+  ];
+
+  const rows = allLeads.map((l) => [
+    l.nome, l.instagramHandle, l.categoria, l.localizacao, l.telefone,
+    l.status, l.mensagemUsada, l.tipoResposta, l.dataContato,
+    l.proximaAcao, l.notas
+  ]);
+
+  // BOM (\ufeff) no início — sem isso o Excel no Windows abre acentuação
+  // (ç, ã, é) toda quebrada em arquivos CSV com UTF-8
+  const csvContent =
+    "\ufeff" +
+    [headers, ...rows].map((row) => row.map(csvEscape).join(",")).join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const today = new Date().toISOString().split("T")[0];
+  a.href = url;
+  a.download = `leads-export-${today}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast(`${allLeads.length} lead(s) exportado(s).`);
+});
+
+// ------------------------------------------------------------
 // Importação em massa (cola de planilha/.txt exportado)
 // ------------------------------------------------------------
 // Formato esperado por linha (separado por TAB, como sai ao copiar de uma
@@ -487,7 +567,7 @@ function showToast(message) {
 // lead. Se não vier ou não for reconhecida, usa a data de hoje.
 function parseImportLine(line) {
   const cols = line.split("\t").map((c) => c.trim());
-  const [nome, categoria, handleRaw, , localizacao, dataRaw] = cols;
+  const [nome, categoria, handleRaw, telefone, localizacao, dataRaw] = cols;
 
   if (!nome) return null; // linha vazia ou malformada — ignora
 
@@ -504,6 +584,7 @@ function parseImportLine(line) {
     nome,
     categoria: categoria || "",
     instagramHandle: (handleRaw || "").replace(/^@/, ""),
+    telefone: telefone || "",
     localizacao: localizacao || "",
     dataContato
   };
@@ -565,6 +646,7 @@ importConfirmBtn.addEventListener("click", async () => {
         nome: lead.nome,
         categoria: lead.categoria,
         localizacao: lead.localizacao,
+        telefone: lead.telefone,
         status,
         mensagemUsada: "",
         tipoResposta: "",

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Templates — Leads STN</title>
+<meta name="theme-color" content="#14181F">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" href="icons/icon-192.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="loading" class="detail-loading">Carregando…</div>
+
+<main id="templates-page" class="detail-page" hidden>
+
+  <header class="detail-topbar">
+    <a href="index.html" class="ghost-btn">← Voltar</a>
+  </header>
+
+  <div class="detail-content">
+
+    <section class="detail-section">
+      <h2 class="detail-section-title">Novo template</h2>
+      <p class="detail-section-hint">Mensagens que você usa com frequência pra abrir contato. Depois de salvo, dá pra escolher direto na hora de registrar um lead novo, e copiar com um toque pra colar no Instagram.</p>
+
+      <label class="field">
+        <span>Nome do template</span>
+        <input type="text" id="t-nome" placeholder="Ex: Abertura v2 — academias">
+      </label>
+
+      <label class="field">
+        <span>Texto da mensagem</span>
+        <textarea id="t-texto" class="detail-textarea" rows="5" placeholder="Olá, tudo bem? Me chamo Guilherme…"></textarea>
+      </label>
+
+      <button id="t-add-btn" class="primary-btn" type="button">Salvar template</button>
+    </section>
+
+    <section class="detail-section">
+      <h2 class="detail-section-title">Seus templates</h2>
+      <div id="templates-list" class="templates-list"></div>
+    </section>
+
+  </div>
+</main>
+
+<div id="toast" class="toast" hidden></div>
+
+<script type="module" src="firebase-config.js"></script>
+<script type="module" src="templates.js"></script>
+</body>
+</html>

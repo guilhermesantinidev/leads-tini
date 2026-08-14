@@ -37,6 +37,8 @@ const dNome = document.getElementById("d-nome");
 const dHandle = document.getElementById("d-handle");
 const dCategoria = document.getElementById("d-categoria");
 const dLocalizacao = document.getElementById("d-localizacao");
+const dTelefone = document.getElementById("d-telefone");
+const dWhatsappBtn = document.getElementById("d-whatsapp-btn");
 const dStatus = document.getElementById("d-status");
 const dTipoResposta = document.getElementById("d-tipo-resposta");
 const dProximaAcao = document.getElementById("d-proxima-acao");
@@ -82,13 +84,32 @@ async function loadLead() {
   dHandle.value = lead.instagramHandle || "";
   dCategoria.value = lead.categoria || "";
   dLocalizacao.value = lead.localizacao || "";
+  dTelefone.value = lead.telefone || "";
   dStatus.value = lead.status || "contatado";
   dTipoResposta.value = lead.tipoResposta || "";
   dProximaAcao.value = lead.proximaAcao || "";
   dMensagem.value = lead.mensagemUsada || "";
   dDescricao.value = lead.notas || "";
   document.title = `${lead.nome || "Lead"} — Leads STN`;
+  updateWhatsappButton();
 }
+
+// ------------------------------------------------------------
+// Botão "Abrir WhatsApp" — monta o link wa.me a partir do telefone
+// ------------------------------------------------------------
+function updateWhatsappButton() {
+  const digits = (dTelefone.value || "").replace(/\D/g, "");
+  if (digits.length < 10) {
+    dWhatsappBtn.hidden = true;
+    return;
+  }
+  // Se a pessoa já digitou o DDI (55) mantém, senão assume Brasil e adiciona
+  const withCountryCode = digits.startsWith("55") ? digits : `55${digits}`;
+  dWhatsappBtn.href = `https://wa.me/${withCountryCode}`;
+  dWhatsappBtn.hidden = false;
+}
+
+dTelefone.addEventListener("input", updateWhatsappButton);
 
 async function loadCategoriaOptions() {
   const snap = await getDocs(collection(db, "leads"));
@@ -112,6 +133,7 @@ saveBtn.addEventListener("click", async () => {
       instagramHandle: dHandle.value.trim().replace(/^@/, ""),
       categoria: dCategoria.value.trim(),
       localizacao: dLocalizacao.value.trim(),
+      telefone: dTelefone.value.trim(),
       status: dStatus.value,
       tipoResposta: dTipoResposta.value,
       proximaAcao: dProximaAcao.value || null,
