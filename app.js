@@ -292,7 +292,12 @@ function renderCard(lead, currentStatus) {
   }
 
   card.appendChild(moveRow);
-  card.addEventListener("click", () => openModal(lead));
+  // Clique no card abre a página de detalhe (mais espaço pra descrever o
+  // cliente e registrar o histórico da negociação) — o modal pequeno fica
+  // só pra criação rápida de lead novo (botão + e compartilhamento do Insta).
+  card.addEventListener("click", () => {
+    window.location.href = `lead-detail.html?id=${encodeURIComponent(lead.id)}`;
+  });
 
   return card;
 }

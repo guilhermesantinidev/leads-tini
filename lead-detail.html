@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Lead — STN Consultoria</title>
+<meta name="theme-color" content="#14181F">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" href="icons/icon-192.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="loading" class="detail-loading">Carregando…</div>
+
+<main id="detail-page" class="detail-page" hidden>
+
+  <header class="detail-topbar">
+    <a href="index.html" class="ghost-btn" id="back-link">← Voltar</a>
+    <button id="detail-delete-btn" class="danger-btn" type="button">Excluir lead</button>
+  </header>
+
+  <div class="detail-content">
+
+    <!-- PERFIL -->
+    <section class="detail-section">
+      <h2 class="detail-section-title">Perfil</h2>
+
+      <div class="detail-grid">
+        <label class="field">
+          <span>Nome / referência</span>
+          <input type="text" id="d-nome" placeholder="Nome do cliente/empresa">
+        </label>
+
+        <label class="field">
+          <span>Instagram (@usuário)</span>
+          <input type="text" id="d-handle" placeholder="usuario" autocomplete="off">
+        </label>
+
+        <label class="field">
+          <span>Categoria</span>
+          <input type="text" id="d-categoria" placeholder="Academia, CrossFit…" list="d-categoria-options">
+          <datalist id="d-categoria-options"></datalist>
+        </label>
+
+        <label class="field">
+          <span>Localização</span>
+          <input type="text" id="d-localizacao" placeholder="Camobi, Santa Maria…">
+        </label>
+
+        <label class="field">
+          <span>Status</span>
+          <select id="d-status">
+            <option value="contatado">Contatado</option>
+            <option value="respondeu">Respondeu</option>
+            <option value="conversa">Em conversa</option>
+            <option value="fechado">Fechado</option>
+            <option value="perdido">Perdido</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Como respondeu</span>
+          <select id="d-tipo-resposta">
+            <option value="">— ainda sem resposta —</option>
+            <option value="interessado">Interessado</option>
+            <option value="pediu_info">Pediu mais informação</option>
+            <option value="nao_interessado">Não interessado</option>
+            <option value="sem_resposta">Visualizou e não respondeu</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Próxima ação (data)</span>
+          <input type="date" id="d-proxima-acao">
+        </label>
+
+        <label class="field">
+          <span>Mensagem usada</span>
+          <input type="text" id="d-mensagem" placeholder="Ex: template de abertura v2">
+        </label>
+      </div>
+    </section>
+
+    <!-- DESCRIÇÃO DO CLIENTE -->
+    <section class="detail-section">
+      <h2 class="detail-section-title">Descrição do cliente</h2>
+      <p class="detail-section-hint">Quem é, qual a dor, contexto do negócio, com quem falar — tudo que ajuda a entender esse cliente de relance antes de uma conversa.</p>
+      <textarea id="d-descricao" class="detail-textarea" rows="8" placeholder="Ex: Academia de bairro, dona se chama Carla, já usa outro sistema de câmera mas reclama do preço. Melhor horário pra falar é de manhã…"></textarea>
+    </section>
+
+    <button id="save-btn" class="primary-btn detail-save-btn" type="button">Salvar alterações</button>
+
+    <!-- HISTÓRICO DA NEGOCIAÇÃO -->
+    <section class="detail-section">
+      <h2 class="detail-section-title">Histórico da negociação</h2>
+      <p class="detail-section-hint">Cada atualização vira uma entrada nova, com data — assim dá pra ver como a negociação evoluiu, não só o estado atual.</p>
+
+      <div class="historico-form">
+        <textarea id="historico-input" rows="2" placeholder="Ex: Respondeu perguntando o preço, vou mandar proposta amanhã…"></textarea>
+        <button id="historico-add-btn" class="primary-btn" type="button">Adicionar ao histórico</button>
+      </div>
+
+      <div id="historico-list" class="historico-list"></div>
+    </section>
+
+  </div>
+</main>
+
+<div id="toast" class="toast" hidden></div>
+
+<script type="module" src="firebase-config.js"></script>
+<script type="module" src="lead-detail.js"></script>
+</body>
+</html>
