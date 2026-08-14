@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Leads — STN Consultoria</title>
+<meta name="theme-color" content="#14181F">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" href="icons/icon-192.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- TELA DE LOGIN -->
+<div id="login-screen" class="login-screen">
+  <div class="login-card">
+    <div class="login-mark">STN</div>
+    <h1>Leads</h1>
+    <p class="login-sub">Controle de prospecção — Instagram &amp; WhatsApp</p>
+    <form id="login-form">
+      <input type="email" id="login-email" placeholder="e-mail" autocomplete="username" required>
+      <input type="password" id="login-password" placeholder="senha" autocomplete="current-password" required>
+      <button type="submit" id="login-btn">Entrar</button>
+      <p id="login-error" class="login-error" hidden></p>
+    </form>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="app" hidden>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="brand-mark">STN</span>
+      <h1>Leads</h1>
+    </div>
+    <div class="topbar-right">
+      <button id="toggle-lost" class="ghost-btn" type="button">
+        <span id="toggle-lost-label">Mostrar perdidos</span>
+      </button>
+      <input type="search" id="search-input" placeholder="Buscar @ ou nome…" aria-label="Buscar lead">
+      <button id="logout-btn" class="ghost-btn" type="button" title="Sair">Sair</button>
+    </div>
+  </header>
+
+  <div class="stats-bar" id="stats-bar"></div>
+
+  <main class="board" id="board">
+    <!-- colunas geradas via JS -->
+  </main>
+
+  <button id="fab-add" class="fab" type="button" aria-label="Adicionar lead">+</button>
+</div>
+
+<!-- MODAL: NOVO / EDITAR LEAD -->
+<div id="lead-modal" class="modal-overlay" hidden>
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2 id="modal-title">Novo lead</h2>
+      <button id="modal-close" class="icon-btn" type="button" aria-label="Fechar">✕</button>
+    </div>
+
+    <form id="lead-form">
+      <input type="hidden" id="lead-id">
+
+      <label class="field">
+        <span>Instagram (@usuário)</span>
+        <input type="text" id="field-handle" placeholder="quadracerrito" autocomplete="off">
+      </label>
+
+      <label class="field">
+        <span>Nome / referência</span>
+        <input type="text" id="field-nome" placeholder="João — dono da quadra" required>
+      </label>
+
+      <label class="field">
+        <span>Status</span>
+        <select id="field-status">
+          <option value="contatado">Contatado</option>
+          <option value="respondeu">Respondeu</option>
+          <option value="conversa">Em conversa</option>
+          <option value="fechado">Fechado</option>
+          <option value="perdido">Perdido</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Mensagem usada</span>
+        <textarea id="field-mensagem" rows="2" placeholder="Ex: template de abertura v2"></textarea>
+      </label>
+
+      <label class="field">
+        <span>Como respondeu</span>
+        <select id="field-tipo-resposta">
+          <option value="">— ainda sem resposta —</option>
+          <option value="interessado">Interessado</option>
+          <option value="pediu_info">Pediu mais informação</option>
+          <option value="nao_interessado">Não interessado</option>
+          <option value="sem_resposta">Visualizou e não respondeu</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Próxima ação (data)</span>
+        <input type="date" id="field-proxima-acao">
+      </label>
+
+      <label class="field">
+        <span>Notas</span>
+        <textarea id="field-notas" rows="3" placeholder="Qualquer detalhe da conversa…"></textarea>
+      </label>
+
+      <div class="modal-actions">
+        <button type="button" id="delete-lead-btn" class="danger-btn" hidden>Excluir</button>
+        <div class="modal-actions-right">
+          <button type="button" id="cancel-lead-btn" class="ghost-btn">Cancelar</button>
+          <button type="submit" class="primary-btn">Salvar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script type="module" src="firebase-config.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
