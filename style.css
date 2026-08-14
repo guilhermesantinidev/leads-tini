@@ -310,6 +310,16 @@ button, input, select, textarea {
   margin-bottom: 6px;
 }
 
+.lead-card-categoria {
+  display: inline-block;
+  font-size: 10.5px;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin-bottom: 6px;
+}
+
 .lead-card-meta {
   display: flex;
   align-items: center;
@@ -451,6 +461,34 @@ button, input, select, textarea {
 }
 
 .field textarea { font-family: var(--font-body); }
+
+.field-row {
+  display: flex;
+  gap: 10px;
+}
+.field-row .field { flex: 1; margin-bottom: 12px; }
+
+.import-help {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0 0 16px;
+}
+.import-help strong { color: var(--text); font-weight: 500; }
+
+.import-textarea {
+  font-family: var(--font-mono) !important;
+  font-size: 12px !important;
+  white-space: pre;
+}
+
+.import-preview {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent);
+  margin: 4px 0 0;
+  min-height: 16px;
+}
 
 .modal-actions {
   display: flex;

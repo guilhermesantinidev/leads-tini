@@ -44,6 +44,7 @@
       <button id="toggle-lost" class="ghost-btn" type="button">
         <span id="toggle-lost-label">Mostrar perdidos</span>
       </button>
+      <button id="import-btn" class="ghost-btn" type="button">Importar</button>
       <input type="search" id="search-input" placeholder="Buscar @ ou nome…" aria-label="Buscar lead">
       <button id="logout-btn" class="ghost-btn" type="button" title="Sair">Sair</button>
     </div>
@@ -78,6 +79,18 @@
         <span>Nome / referência</span>
         <input type="text" id="field-nome" placeholder="João — dono da quadra" required>
       </label>
+
+      <div class="field-row">
+        <label class="field">
+          <span>Categoria</span>
+          <input type="text" id="field-categoria" placeholder="Academia, CrossFit…" list="categoria-options">
+          <datalist id="categoria-options"></datalist>
+        </label>
+        <label class="field">
+          <span>Localização</span>
+          <input type="text" id="field-localizacao" placeholder="Camobi, Santa Maria…">
+        </label>
+      </div>
 
       <label class="field">
         <span>Status</span>
@@ -128,6 +141,46 @@
 </div>
 
 <div id="toast" class="toast" hidden></div>
+
+<!-- MODAL: IMPORTAÇÃO EM MASSA -->
+<div id="import-modal" class="modal-overlay" hidden>
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2>Importar leads</h2>
+      <button id="import-modal-close" class="icon-btn" type="button" aria-label="Fechar">✕</button>
+    </div>
+
+    <p class="import-help">
+      Cola aqui as linhas copiadas de uma planilha (Excel/Google Sheets/.txt exportado).
+      Ordem das colunas esperada: <strong>Nome · Categoria · @Instagram · Telefone · Localização · Data</strong>
+      (separadas por TAB — é o que sai automaticamente ao copiar de uma planilha). Colunas vazias
+      no meio tudo bem, só não pula nenhuma posição.
+    </p>
+
+    <label class="field">
+      <span>Status inicial pra todos os importados</span>
+      <select id="import-status">
+        <option value="contatado">Contatado</option>
+        <option value="respondeu">Respondeu</option>
+        <option value="conversa">Em conversa</option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Cole as linhas aqui</span>
+      <textarea id="import-textarea" class="import-textarea" rows="10" placeholder="Ginásio Basso&#9;Society/Campo&#9;@ginasiobasso&#9;&#9;&#9;07/08/2026"></textarea>
+    </label>
+
+    <p id="import-preview" class="import-preview"></p>
+
+    <div class="modal-actions">
+      <div class="modal-actions-right">
+        <button type="button" id="import-cancel-btn" class="ghost-btn">Cancelar</button>
+        <button type="button" id="import-confirm-btn" class="primary-btn">Importar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script type="module" src="firebase-config.js"></script>
 <script type="module" src="app.js"></script>

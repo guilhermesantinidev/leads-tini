@@ -79,11 +79,23 @@ const leadForm = document.getElementById("lead-form");
 const fieldId = document.getElementById("lead-id");
 const fieldHandle = document.getElementById("field-handle");
 const fieldNome = document.getElementById("field-nome");
+const fieldCategoria = document.getElementById("field-categoria");
+const fieldLocalizacao = document.getElementById("field-localizacao");
 const fieldStatus = document.getElementById("field-status");
 const fieldMensagem = document.getElementById("field-mensagem");
 const fieldTipoResposta = document.getElementById("field-tipo-resposta");
 const fieldProximaAcao = document.getElementById("field-proxima-acao");
 const fieldNotas = document.getElementById("field-notas");
+const categoriaOptions = document.getElementById("categoria-options");
+
+const importBtn = document.getElementById("import-btn");
+const importModal = document.getElementById("import-modal");
+const importModalClose = document.getElementById("import-modal-close");
+const importCancelBtn = document.getElementById("import-cancel-btn");
+const importConfirmBtn = document.getElementById("import-confirm-btn");
+const importTextarea = document.getElementById("import-textarea");
+const importStatusSelect = document.getElementById("import-status");
+const importPreview = document.getElementById("import-preview");
 
 const toastEl = document.getElementById("toast");
 
@@ -154,6 +166,12 @@ function render() {
 
   renderStats(filtered);
   renderBoard(filtered);
+  updateCategoriaOptions();
+}
+
+function updateCategoriaOptions() {
+  const categorias = [...new Set(allLeads.map((l) => l.categoria).filter(Boolean))].sort();
+  categoriaOptions.innerHTML = categorias.map((c) => `<option value="${escapeHtml(c)}"></option>`).join("");
 }
 
 function renderStats(leads) {
@@ -233,6 +251,7 @@ function renderCard(lead, currentStatus) {
 
   card.innerHTML = `
     <div class="lead-card-name">${escapeHtml(lead.nome)}</div>
+    ${lead.categoria ? `<div class="lead-card-categoria">${escapeHtml(lead.categoria)}</div>` : ""}
     ${handle ? `<div class="lead-card-handle">${escapeHtml(handle)}</div>` : ""}
     <div class="lead-card-meta">
       <span>${formatDate(lead.dataContato) || ""}</span>
@@ -318,6 +337,8 @@ function openModal(lead = null, prefill = null) {
     fieldId.value = lead.id;
     fieldHandle.value = lead.instagramHandle || "";
     fieldNome.value = lead.nome || "";
+    fieldCategoria.value = lead.categoria || "";
+    fieldLocalizacao.value = lead.localizacao || "";
     fieldStatus.value = lead.status || "contatado";
     fieldMensagem.value = lead.mensagemUsada || "";
     fieldTipoResposta.value = lead.tipoResposta || "";
@@ -376,6 +397,8 @@ leadForm.addEventListener("submit", async (e) => {
   const payload = {
     instagramHandle: fieldHandle.value.trim().replace(/^@/, ""),
     nome: fieldNome.value.trim(),
+    categoria: fieldCategoria.value.trim(),
+    localizacao: fieldLocalizacao.value.trim(),
     status: fieldStatus.value,
     mensagemUsada: fieldMensagem.value.trim(),
     tipoResposta: fieldTipoResposta.value,
@@ -448,6 +471,120 @@ function showToast(message) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { toastEl.hidden = true; }, 3000);
 }
+
+// ------------------------------------------------------------
+// Importação em massa (cola de planilha/.txt exportado)
+// ------------------------------------------------------------
+// Formato esperado por linha (separado por TAB, como sai ao copiar de uma
+// planilha): Nome · Categoria · @Instagram · Telefone · Localização · Data
+//
+// Data é opcional — se vier no formato dd/mm/aaaa, vira o "dataContato" do
+// lead. Se não vier ou não for reconhecida, usa a data de hoje.
+function parseImportLine(line) {
+  const cols = line.split("\t").map((c) => c.trim());
+  const [nome, categoria, handleRaw, , localizacao, dataRaw] = cols;
+
+  if (!nome) return null; // linha vazia ou malformada — ignora
+
+  let dataContato = new Date().toISOString().split("T")[0];
+  if (dataRaw) {
+    const match = dataRaw.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (match) {
+      const [, dd, mm, yyyy] = match;
+      dataContato = `${yyyy}-${mm}-${dd}`;
+    }
+  }
+
+  return {
+    nome,
+    categoria: categoria || "",
+    instagramHandle: (handleRaw || "").replace(/^@/, ""),
+    localizacao: localizacao || "",
+    dataContato
+  };
+}
+
+function parseImportText(text) {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .map(parseImportLine)
+    .filter(Boolean);
+}
+
+function openImportModal() {
+  importTextarea.value = "";
+  importPreview.textContent = "";
+  importModal.hidden = false;
+}
+function closeImportModal() {
+  importModal.hidden = true;
+}
+
+importBtn.addEventListener("click", openImportModal);
+importModalClose.addEventListener("click", closeImportModal);
+importCancelBtn.addEventListener("click", closeImportModal);
+importModal.addEventListener("click", (e) => {
+  if (e.target === importModal) closeImportModal();
+});
+
+importTextarea.addEventListener("input", () => {
+  const parsed = parseImportText(importTextarea.value);
+  importPreview.textContent = parsed.length > 0
+    ? `${parsed.length} lead(s) reconhecido(s) pra importar.`
+    : "Nenhuma linha reconhecida ainda.";
+});
+
+importConfirmBtn.addEventListener("click", async () => {
+  const parsed = parseImportText(importTextarea.value);
+  if (parsed.length === 0) {
+    showToast("Nada pra importar — confere se colou as linhas certas.");
+    return;
+  }
+
+  importConfirmBtn.disabled = true;
+  importConfirmBtn.textContent = "Importando…";
+
+  const status = importStatusSelect.value;
+  let sucesso = 0;
+  let falhas = 0;
+
+  // Sequencial (não Promise.all em paralelo) — evita estourar limite de
+  // escritas simultâneas do Firestore se um dia a lista colada for grande,
+  // e deixa o preview de progresso mais previsível.
+  for (const lead of parsed) {
+    try {
+      await addDoc(collection(db, "leads"), {
+        instagramHandle: lead.instagramHandle,
+        nome: lead.nome,
+        categoria: lead.categoria,
+        localizacao: lead.localizacao,
+        status,
+        mensagemUsada: "",
+        tipoResposta: "",
+        proximaAcao: null,
+        notas: "",
+        dataContato: lead.dataContato,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      sucesso++;
+    } catch (err) {
+      console.error("Falha ao importar lead:", lead.nome, err);
+      falhas++;
+    }
+  }
+
+  importConfirmBtn.disabled = false;
+  importConfirmBtn.textContent = "Importar";
+  closeImportModal();
+  showToast(
+    falhas === 0
+      ? `${sucesso} lead(s) importado(s) com sucesso.`
+      : `${sucesso} importado(s), ${falhas} falharam — confere o console.`
+  );
+});
 
 // ------------------------------------------------------------
 // Service worker (PWA)
